@@ -29,15 +29,20 @@ import com.jszf.txsystem.MyApplication;
 import com.jszf.txsystem.R;
 import com.jszf.txsystem.bean.Merchant;
 import com.jszf.txsystem.bean.OrderInfo;
+import com.jszf.txsystem.bean.ProductQrcodeBean;
+import com.jszf.txsystem.core.ApiRequestStores;
+import com.jszf.txsystem.core.HttpHelper;
 import com.jszf.txsystem.core.mvp.base.BaseActivity;
 import com.jszf.txsystem.service_receiver.BluetoothService;
 import com.jszf.txsystem.service_receiver.MQConnectionService;
 import com.jszf.txsystem.ui.MyAlertDialog;
 import com.jszf.txsystem.util.Constant;
+import com.jszf.txsystem.util.GuidUtils;
 import com.jszf.txsystem.util.MD5Utils;
 import com.jszf.txsystem.util.ParaUtils;
 import com.jszf.txsystem.util.PrintUtils;
 import com.jszf.txsystem.util.QRCodeUtils;
+import com.jszf.txsystem.util.RSAUtils;
 import com.jszf.txsystem.view.CustomTextView;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.Callback;
@@ -55,6 +60,11 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.Call;
 import okhttp3.Response;
+import rx.Observable;
+import rx.Scheduler;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class QrCodeProductActivity extends BaseActivity implements Serializable {
     public static MqttClient client;        //MQTT服务客户端对象
@@ -207,8 +217,57 @@ public class QrCodeProductActivity extends BaseActivity implements Serializable 
 //                mIntent = new Intent(this, MQConnectionService.class);
         mService.start();
         Log.d("TAG", "数据请求");
-        requestProduct();
+//        requestProduct();
+//        requestForCode();
+    }
 
+    private HashMap<String, String> getHashMap() {
+        HashMap<String,String> map = new HashMap<>();
+        map.put("PayType",type+"");
+        map.put("Amt",amount);
+        String guid = GuidUtils.getVarUUID();
+        map.put("Guid", guid);
+        map.put("MerchantNo", MyApplication.merchantNo);
+        map.put("UserName",MyApplication.userLoginName);
+        try {
+            map.put("MerchantKey", RSAUtils.encrypt(MyApplication.MD5key, Constant.AppPublicKey));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            String str = RSAUtils.sign(guid, Constant.AppPrivateKey);
+            map.put("Sign",str);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
+    private void requestForCode() {
+        final ApiRequestStores apiStores = HttpHelper.getInstance().getRetrofit2().create(ApiRequestStores.class);
+        Observable<ProductQrcodeBean> observable = apiStores.requestForProductQRcode(getHashMap());
+        observable.observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Subscriber<ProductQrcodeBean>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onNext(ProductQrcodeBean mProductQrcodeBean) {
+                        boolean isSuccess = mProductQrcodeBean.isSuccess();
+                        if (isSuccess) {
+                            String url = mProductQrcodeBean.get_OrderModel().getCodeUrl();
+                            Bitmap bmp = QRCodeUtils.createQRImage(url, 400, 400, smallbitmap,null);
+                            mIvIconQrcode.setImageBitmap(bmp);
+                        }
+                    }
+                });
     }
 
     private void init() {
@@ -269,6 +328,8 @@ public class QrCodeProductActivity extends BaseActivity implements Serializable 
         mMerchant = (Merchant) mIntent.getSerializableExtra("merchantInfo");
         amount = getIntent().getStringExtra("amount");
     }
+
+
 
     private void requestProduct() {
         showLoadingDialog();

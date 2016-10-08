@@ -158,38 +158,6 @@ public class BillDetailsActivity extends BaseActivity {
                     }
                 }
             }));
-//            bservable.subscribe(new Observer<BillDetailBean>() {
-//                @Override
-//                public void onCompleted() {
-//                    dismissLoading();
-//                }
-//
-//                @Override
-//                public void onError(Throwable e) {
-//                    dismissLoading();
-//                    Log.d("BillDetailsActivity", "----------" + e.getMessage().toString());
-//                }
-//
-//                @Override
-//                public void onNext(BillDetailBean billDetailBean) {
-//                    dismissLoading();
-//                    String dealCode = billDetailBean.getDealCode();
-//                    if (!TextUtils.isEmpty(dealCode) && dealCode.equals(Constant.DEAL_CODE_SUCCESS)) {
-//                        txOrderNo = billDetailBean.getTxOrderNo();
-//                        payChannelCode = billDetailBean.getPayChannelCode();
-//                        payState = billDetailBean.getOrderPayStatus();
-//                        payTime = billDetailBean.getOrderTime();
-//                        refundAmount = billDetailBean.getRefundAmount();
-//                        productName = billDetailBean.getProductName();
-//                        orderAmount = billDetailBean.getOrderAmount();
-//                        bankOrderNo = billDetailBean.getBankOrderNo();
-//                        Log.d("BillDetailsActivity", "bankOrderNo:" + bankOrderNo);
-//                        extraStr1 = billDetailBean.getExt1();
-//                        extraStr2 = billDetailBean.getExt2();
-//                        setView();
-//                    }
-//                }
-//            });
         } catch (Exception e) {
             Log.d("BillDetailsActivity", "-------" + e.getMessage().toString());
         }
@@ -334,6 +302,7 @@ public class BillDetailsActivity extends BaseActivity {
                 int offAmount = Integer.parseInt(orderAmount) - Integer.parseInt(refundAmount);
                 intent.putExtra("amount", offAmount);
                 intent.putExtra("orderNo", orderNo);
+                intent.putExtra("txOrderNo",txOrderNo);
                 intent.putExtra("merchantInfo", mMerchant);
                 startActivity(intent);
                 break;

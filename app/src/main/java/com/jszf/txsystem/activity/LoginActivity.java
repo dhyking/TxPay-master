@@ -20,7 +20,10 @@ import com.jszf.txsystem.MyApplication;
 import com.jszf.txsystem.R;
 import com.jszf.txsystem.bean.LoginBean;
 import com.jszf.txsystem.bean.Merchant;
+import com.jszf.txsystem.core.ApiRequestStores;
+import com.jszf.txsystem.core.HttpHelper;
 import com.jszf.txsystem.core.mvp.MvpActivity;
+import com.jszf.txsystem.core.mvp.base.BaseActivity;
 import com.jszf.txsystem.core.mvp.login.ILoginView;
 import com.jszf.txsystem.core.mvp.login.LoginPresenterImpl;
 import com.jszf.txsystem.util.Constant;
@@ -34,8 +37,13 @@ import java.util.HashMap;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
-public class LoginActivity extends MvpActivity<ILoginView,LoginPresenterImpl> implements TextView.OnEditorActionListener, ILoginView {
+public class LoginActivity extends BaseActivity implements TextView.OnEditorActionListener{
     @BindView(R.id.edt_username)
     EditText mEdtUsername;      //用户名
     @BindView(R.id.edt_password)
@@ -64,24 +72,27 @@ public class LoginActivity extends MvpActivity<ILoginView,LoginPresenterImpl> im
     private String userLoginName;   //保存的账号
     private String userLoginPassword;   //保存的密码
     private Date mCurDate;      //当前时间
+    private CompositeSubscription compositeSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
-    }
-
-    @Override
-    protected void initData() {
         readAccount();
         mEdtPassword.setOnEditorActionListener(this);
     }
 
-    @Override
-    protected LoginPresenterImpl createPresenter() {
-        return new LoginPresenterImpl(this);
-    }
+////    @Override
+////    protected void initData() {
+////        readAccount();
+////        mEdtPassword.setOnEditorActionListener(this);
+////    }
+//
+//    @Override
+//    protected LoginPresenterImpl createPresenter() {
+//        return new LoginPresenterImpl(this);
+//    }
 
     private void readAccount() {
         sp = getSharedPreferences(LOGININFOFILE, MODE_PRIVATE);
@@ -201,7 +212,9 @@ public class LoginActivity extends MvpActivity<ILoginView,LoginPresenterImpl> im
             } else {
                 userLoginPassword = userPassword;
             }
-            mvpPresenter.requestLogin(getRequestParams());
+
+            requestLoginInto();
+//            mvpPresenter.requestLogin(getRequestParams());
             Log.d("TAG", "1");
             return true;
         }
@@ -252,7 +265,9 @@ public class LoginActivity extends MvpActivity<ILoginView,LoginPresenterImpl> im
                     Toast.makeText(getApplicationContext(), "网络连接异常,请检查!", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                mvpPresenter.requestLogin(getRequestParams());
+
+                requestLoginInto();
+//                mvpPresenter.requestLogin(getRequestParams());
                 break;
             case R.id.iv_login_join:
                 try {
@@ -268,34 +283,85 @@ public class LoginActivity extends MvpActivity<ILoginView,LoginPresenterImpl> im
         }
     }
 
-    @Override
-    public void hideLoading() {
-        dismissLoading();
-
-    }
-
-    @Override
-    public void showLoading() {
+    private void requestLoginInto() {
         showLoadingDialog();
+
+        ApiRequestStores apiStores = HttpHelper.getInstance().getRetrofit().create(ApiRequestStores.class);
+        Observable mObservable = apiStores.requestForLogin(getRequestParams())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io());
+        compositeSubscription = new CompositeSubscription();
+        compositeSubscription.add(mObservable.subscribe(new Subscriber<LoginBean>() {
+            @Override
+            public void onCompleted() {
+                dismissLoading();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                dismissLoading();
+                Log.d("LoginFragment", "e:" + e);
+            }
+
+            @Override
+            public void onNext(LoginBean loginBean) {
+                dismissLoading();
+                try {
+                    String dealCode = loginBean.getDealCode();
+                    if (!dealCode.equals(Constant.DEAL_CODE_SUCCESS)) {
+                        mHandler.post(() -> Toast.makeText(getApplicationContext(), "账号或密码错误，请检查!", Toast.LENGTH_SHORT).show());
+                        return;
+                    }
+                    MyApplication.unEncryptMd5 = loginBean.getMD5key();
+                    MyApplication.merchantNo = loginBean.getMerchantNo();
+                    MyApplication.print_outlet = MyApplication.merchantNo;
+                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                    MyApplication.userLoginName = userLoginName;
+                    startActivity(intent);
+                    Log.d("LoginActivity", MyApplication.unEncryptMd5);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }));
     }
 
+//    @Override
+//    public void hideLoading() {
+//        dismissLoading();
+//
+//    }
+//
+//    @Override
+//    public void showLoading() {
+//        showLoadingDialog();
+//    }
+
+//    @Override
+//    public void login(LoginBean loginBean) {
+//        try {
+//            String dealCode = loginBean.getDealCode();
+//            if (!dealCode.equals(Constant.DEAL_CODE_SUCCESS)) {
+//                mHandler.post(() -> Toast.makeText(getApplicationContext(), "账号或密码错误，请检查!", Toast.LENGTH_SHORT).show());
+//                return;
+//            }
+//            MyApplication.unEncryptMd5 = loginBean.getMD5key();
+//            MyApplication.merchantNo = loginBean.getMerchantNo();
+//            MyApplication.print_outlet = MyApplication.merchantNo;
+//            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+//            MyApplication.userLoginName = userLoginName;
+//            startActivity(intent);
+//            Log.d("LoginActivity", MyApplication.unEncryptMd5);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     @Override
-    public void login(LoginBean loginBean) {
-        try {
-            String dealCode = loginBean.getDealCode();
-            if (!dealCode.equals(Constant.DEAL_CODE_SUCCESS)) {
-                mHandler.post(() -> Toast.makeText(getApplicationContext(), "账号或密码错误，请检查!", Toast.LENGTH_SHORT).show());
-                return;
-            }
-            MyApplication.unEncryptMd5 = loginBean.getMD5key();
-            MyApplication.merchantNo = loginBean.getMerchantNo();
-            MyApplication.print_outlet = MyApplication.merchantNo;
-            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-            MyApplication.userLoginName = userLoginName;
-            startActivity(intent);
-            Log.d("LoginActivity", MyApplication.unEncryptMd5);
-        } catch (Exception e) {
-            e.printStackTrace();
+    protected void onDestroy() {
+        if (compositeSubscription != null) {
+            compositeSubscription.unsubscribe();
         }
+        super.onDestroy();
     }
 }

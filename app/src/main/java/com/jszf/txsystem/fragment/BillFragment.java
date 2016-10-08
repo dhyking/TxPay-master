@@ -69,8 +69,6 @@ public class BillFragment extends BaseFragment implements CompoundButton.OnCheck
         OnDateSetListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    @BindView(R.id.iv_bill_back)
-    ImageView mIvBillBack;
     @BindView(R.id.tv_bill_title)
     TextView mTvBillTitle;
     @BindView(R.id.tv_bill_filter)
@@ -126,7 +124,7 @@ public class BillFragment extends BaseFragment implements CompoundButton.OnCheck
 
 
     private void iniRequest() {
-        requestBillData(page);
+        requestBillData(1);
     }
 
     private void requestBillData(int page) {
@@ -143,7 +141,7 @@ public class BillFragment extends BaseFragment implements CompoundButton.OnCheck
 
             @Override
             public void onError(Throwable e) {
-                Log.d("MessageFragment", "e:" + e);
+                Log.d("BillFragment", "e:" + e);
             }
 
             @Override
@@ -262,7 +260,6 @@ public class BillFragment extends BaseFragment implements CompoundButton.OnCheck
     }
 
     private void initListener() {
-        mIvBillBack.setOnClickListener(this);
         mTvBillFilter.setOnClickListener(this);
     }
 
@@ -358,8 +355,6 @@ public class BillFragment extends BaseFragment implements CompoundButton.OnCheck
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.iv_bill_back:
-                break;
             case R.id.tv_bill_filter:
                 if (popupWindow != null && popupWindow.isShowing()) {
                     popupWindow.dismiss();
@@ -440,6 +435,8 @@ public class BillFragment extends BaseFragment implements CompoundButton.OnCheck
         // 设置动画效果 [R.style.AnimationFade 是自己事先定义好的]
         ColorDrawable cd = new ColorDrawable(getResources().getColor(R.color.white));
         popupWindow.setBackgroundDrawable(cd);
+        popupWindow.setFocusable(true);
+        popupWindow.setOutsideTouchable(true);  //设置点击屏幕其它地方弹出框消失
         mTvSelectTime.setOnClickListener(this);
         tx_submit.setOnClickListener(this);
         List<String> list = new ArrayList<>();

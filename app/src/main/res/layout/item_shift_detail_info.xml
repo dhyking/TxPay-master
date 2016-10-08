@@ -8,15 +8,16 @@
     <TextView
         android:id="@+id/tv_head_indicator"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/view_padding35"
+        android:layout_height="@dimen/view_padding20"
         android:background="@drawable/bg_shift_item_divider"
         android:visibility="gone" />
 
 
         <LinearLayout
+            android:paddingBottom="@dimen/view_padding2"
             android:id="@+id/ll_shift"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/view_padding35"
+            android:layout_height="@dimen/view_padding20"
             android:layout_below="@id/tv_head_indicator"
             android:background="@color/white"
             android:gravity="center_vertical"

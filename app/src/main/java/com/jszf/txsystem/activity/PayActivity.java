@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.jszf.txsystem.R;
 import com.jszf.txsystem.bean.Merchant;
 import com.jszf.txsystem.core.mvp.base.BaseActivity;
+import com.jszf.txsystem.ui.MyAlertDialog;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -166,17 +167,32 @@ public class PayActivity extends BaseActivity {
     private boolean validAmount() {
 //        equal();
         amount = mTvPayAmount.getText().toString().trim();
-//        double str = Double.parseDouble(amount);
-//        orderAmount = (int) (str *100);
+        if (amount.startsWith("0") && !amount.startsWith("0.") ) {
+            amount = amount.substring(1,amount.length() -1);
+        }
         if (amount.equals("0.00") || amount.equals("0") || TextUtils.isEmpty(amount)) {
-            mBuilder.setMessage("输入金额为空,请重新输入!");
-            mBuilder.setPositiveButton("确定", (dialog, which) -> {
-                mBuilder.create().dismiss();
-            });
-            mBuilder.create().show();
+//            mBuilder.setMessage("输入金额为空,请重新输入!");
+//            mBuilder.setPositiveButton("确定", (dialog, which) -> {
+//                mBuilder.create().dismiss();
+//            });
+//            mBuilder.create().show();
+            setDialog(getString(R.string.text_empty));
             return true;
         }
         return false;
+    }
+
+    private void setDialog(String message) {
+        final MyAlertDialog dialog = new MyAlertDialog(PayActivity.this)
+                .builder();
+        dialog.dialog_marTop.setVisibility(View.GONE);
+        dialog.btn_neg.setVisibility(View.GONE);
+        dialog.setTitle(getString(R.string.text_notice))
+                .setMsg(message)
+                .setPositiveButton("确定", v -> {
+
+                });
+        dialog.show();
     }
 
     private void codeProduct() {

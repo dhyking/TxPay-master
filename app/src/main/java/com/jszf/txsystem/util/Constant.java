@@ -58,6 +58,7 @@ public class Constant {
     public static final String CAPTURE_URL = "http://pc.tongxingpay.com/order/new?";
     public static final String SHIFT_URL = "http://pc.tongxingpay.com/shift/new?";
     public static final String Grid_URL = "http://pc.tongxingpay.com/order/grid?";
+    public static final String Get_URL = "http://pc.tongxingpay.com/order/get?";
     public static final String SHIFT_ORDER = "http://pc.tongxingpay.com/shift/grid?";
     public static final String REFUND_URL = "http://pc.tongxingpay.com//order/refund?";
 

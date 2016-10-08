@@ -13,6 +13,7 @@ import com.jszf.txsystem.bean.NoticeBean;
 import com.jszf.txsystem.bean.OrderRefundBean;
 import com.jszf.txsystem.bean.PageOrderBean;
 import com.jszf.txsystem.bean.PageShiftBean;
+import com.jszf.txsystem.bean.ProductQrcodeBean;
 import com.jszf.txsystem.bean.RefundBean;
 import com.jszf.txsystem.bean.ResetPasswordBean;
 import com.jszf.txsystem.bean.ShiftBean;
@@ -42,6 +43,10 @@ public interface ApiRequestStores {
     //登录请求
     @POST("txpayApi/app?")
     Observable<LoginBean> login(@QueryMap HashMap<String,String> params);
+
+    //登录请求
+    @POST("txpayApi/app?")
+    Observable<LoginBean> requestForLogin(@QueryMap HashMap<String,String> params);
 
     //home页面请求
     @GET("txpayApi/app?")
@@ -88,19 +93,29 @@ public interface ApiRequestStores {
     Observable<AnalyseBean> requestAnalyse(@QueryMap HashMap<String,String> params);
 
      //扫描条码
-//     @FormUrlEncoded
+     @FormUrlEncoded
      @GET("order/new?")
-    Observable<CaptureBean> requestCapture(@QueryMap HashMap<String,String> params);
+    Observable<CaptureBean> requestForCapture(@QueryMap HashMap<String,String> params);
+
+    //生成二维码
+     @FormUrlEncoded
+     @GET("order/getCodeUrl?")
+    Observable<ProductQrcodeBean> requestForProductQRcode(@QueryMap HashMap<String,String> params);
 
     //订单分页数据
     @FormUrlEncoded
     @POST("order/grid?")
-    Observable<PageOrderBean>  requestPageOrder(@FieldMap HashMap<String,String> params);
+    Observable<PageOrderBean>  requestForPageOrder(@FieldMap HashMap<String,String> params);
+
+    //单笔订单数据
+    @FormUrlEncoded
+    @POST("order/get?")
+    Observable<String>  requestForEveryOrder(@FieldMap HashMap<String,String> params);
 
     //订单退款
     @FormUrlEncoded
     @POST("order/refund?")
-    Observable<OrderRefundBean> requestOrderRefund(@FieldMap HashMap<String,String> params);
+    Observable<OrderRefundBean> requestForOrderRefund(@FieldMap HashMap<String,String> params);
 
     //创建交班扎帐
     @FormUrlEncoded
@@ -113,10 +128,3 @@ public interface ApiRequestStores {
     Observable<PageShiftBean>  requestPageShift(@FieldMap HashMap<String,String> params);
 }
 
-//http://api.tongxingpay.com/txpayApi/app?&Cp=1&
-// Guid=5ae38a7d-6e0b-4a29-b6b8-b226e6e26675&MerchantKey
-// =dea4c02423794a8ead4743b10a79126f&Size=10&MerchantNo=TX0000039
-// &RecordsType=%E5%95%86%E6%88%B7%E6%89%80%E6%9C%89&
-// Sign=Dp0s8jcS%2BopJhc4Rzforv3FKKmYK80rqu17lonF7dXf/UYAKZ%2Bm11lUk46
-// xAPK8uO5VvhWevmLn1PcAI5fR2WEEUPFgouXSi/PMEoZ57O2EqmCtEHtPlBtmfD
-// %2BwgJHCXkolgZfvH7wUhH7kcE5h4Flq9GMIeDMxMockHELNL1VQ%3D

@@ -173,7 +173,8 @@ public class MyFragment extends BaseFragment {
         dialog1.dialog_marTop.setVisibility(View.GONE);
         dialog1.btn_neg.setVisibility(View.GONE);
         dialog1.btn_pos.setVisibility(View.GONE);
-        dialog1.setMsg(message)
+        dialog1.setTitle(getString(R.string.text_quit))
+                .setMsg(message)
                 .setNegativeButton("取消", v -> {
 
                 })

@@ -2,6 +2,7 @@ package com.jszf.txsystem.ui;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -64,6 +65,11 @@ public class MyAlertDialog {
 		// 获取自定义Dialog布局中的控件
 		lLayout_bg = (LinearLayout) view.findViewById(R.id.lLayout_bg);
 		txt_title = (TextView) view.findViewById(R.id.txt_title);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			txt_title.setTextColor(context.getResources().getColor(R.color.black,null));
+		} else {
+			txt_title.setTextColor(context.getResources().getColor(R.color.black));
+		}
 		txt_title.setVisibility(View.GONE);
 		txt_msg = (TextView) view.findViewById(R.id.txt_msg);
 		txt_msg.setVisibility(View.GONE);

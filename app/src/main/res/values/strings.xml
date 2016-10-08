@@ -100,4 +100,8 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="text_notice">提示</string>
+    <string name="text_quit">退出</string>
+    <string name="text_empty">输入金额为空,请重新输入!</string>
 </resources>

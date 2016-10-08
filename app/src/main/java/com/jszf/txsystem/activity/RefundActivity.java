@@ -27,8 +27,13 @@ import com.jszf.txsystem.core.HttpHelper;
 import com.jszf.txsystem.core.mvp.base.BaseActivity;
 import com.jszf.txsystem.ui.MyAlertDialog;
 import com.jszf.txsystem.util.Constant;
+import com.jszf.txsystem.util.GuidUtils;
 import com.jszf.txsystem.util.MD5Utils;
 import com.jszf.txsystem.util.ParaUtils;
+import com.jszf.txsystem.util.RSAUtils;
+import com.jszf.txsystem.util.RequestServerUtils;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.Callback;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,6 +42,8 @@ import java.util.HashMap;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Response;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -70,6 +77,7 @@ public class RefundActivity extends BaseActivity implements TextWatcher {
     private int payAmount;   //付款金额
     private String description; //说明
     Handler mHandler = new Handler();
+    private String txOrderNo;   //同兴订单号
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,12 +88,14 @@ public class RefundActivity extends BaseActivity implements TextWatcher {
 
         mBuilder = new AlertDialog.Builder(this);
         initView();
+        requestRefund2();
     }
 
     private void initView() {
         Intent mIntent = getIntent();
         orderNo = mIntent.getStringExtra("orderNo");
         payAmount = mIntent.getIntExtra("amount", 0);
+        txOrderNo = mIntent.getStringExtra("txOrderNo");
         Log.d("TAG", "a:" + payAmount);
         mMerchant = (Merchant) mIntent.getSerializableExtra("merchantInfo");
         mEdtRefundRefundAmount.setHint("本次最多可退款金额:  " + ((double) payAmount / 100) + "元");
@@ -211,6 +221,7 @@ public class RefundActivity extends BaseActivity implements TextWatcher {
         final MyAlertDialog dialog1 = new MyAlertDialog(RefundActivity.this)
                 .builder();
         dialog1.dialog_marTop.setVisibility(View.GONE);
+        dialog1.btn_neg.setVisibility(View.GONE);
         dialog1.setMsg(message)
                .setPositiveButton("确定", v -> {
                     startActivity(new Intent(RefundActivity.this, BillActivity.class));
@@ -233,11 +244,16 @@ public class RefundActivity extends BaseActivity implements TextWatcher {
     }
 
     private void setDialog2(String message) {
-        mBuilder.setMessage(message);
-        mBuilder.setPositiveButton("确定", (dialog, which) -> {
-            mBuilder.create().dismiss();
-        });
-        mBuilder.create().show();
+        final MyAlertDialog dialog = new MyAlertDialog(RefundActivity.this)
+                .builder();
+        dialog.dialog_marTop.setVisibility(View.GONE);
+        dialog.btn_neg.setVisibility(View.GONE);
+        dialog.setTitle(getString(R.string.text_notice))
+                .setMsg(message)
+                .setPositiveButton("确定", v -> {
+
+                });
+        dialog.show();
     }
 
     @Override
@@ -291,16 +307,73 @@ public class RefundActivity extends BaseActivity implements TextWatcher {
                     return;
                 }
                 if (validRefundAmount()) return;
-                showLoadingDialog();
-                requestRefund();
-//                requestRefund2();
+//                showLoadingDialog();
+//                requestRefund();
+                requestRefund2();
                 break;
         }
     }
 
-
+    private HashMap<String, String> getHashMap() {
+        HashMap<String, String> map = new HashMap<>();
+        String guid = GuidUtils.getVarUUID();
+        map.put("Guid", guid);
+        map.put("Key","TxOrderNo");
+        map.put("Value",txOrderNo);
+        map.put("MerchantNo", MyApplication.merchantNo);
+        map.put("MerchantKey", MyApplication.MD5key);
+        try {
+            String sign = RSAUtils.sign(guid, Constant.AppPrivateKey);
+            map.put("Sign", sign);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
 
     private void requestRefund2() {
+        Log.d("refund","params-------->"+ParaUtils.createLinkString(getHashMap()));
+        OkHttpUtils.post()
+                .url(Constant.Grid_URL)
+                .params(getHashMap())
+                .build()
+                .connTimeOut(5000)
+                .execute(new Callback() {
+                    @Override
+                    public Object parseNetworkResponse(Response mResponse) throws Exception {
+                        return mResponse.body().string();
+                    }
 
+                    @Override
+                    public void onError(Call mCall, Exception mE) {
+                        Log.d("refund","error:--------->"+mE.toString());
+                    }
+
+                    @Override
+                    public void onResponse(Call mCall, Object mO) {
+                        String result = mO.toString();
+                        Log.d("refund","result:==========>"+result);
+                    }
+                });
+//        final ApiRequestStores apiStores = HttpHelper.getInstance().getRetrofit2().create(ApiRequestStores.class);
+//        Observable<String> observable = apiStores.requestForEveryOrder(getHashMap());
+//        observable.subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Subscriber<String>() {
+//                    @Override
+//                    public void onCompleted() {
+//
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        Log.d("refund","error:------>"+e.toString());
+//                    }
+//
+//                    @Override
+//                    public void onNext(String mS) {
+//                        Log.d("refund","result:------>"+mS);
+//                    }
+//                });
     }
 }
