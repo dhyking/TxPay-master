@@ -13,7 +13,7 @@ import com.jszf.txsystem.bean.NoticeBean;
 import com.jszf.txsystem.bean.OrderRefundBean;
 import com.jszf.txsystem.bean.PageOrderBean;
 import com.jszf.txsystem.bean.PageShiftBean;
-import com.jszf.txsystem.bean.ProductQrcodeBean;
+import com.jszf.txsystem.bean.ProductCodeBean;
 import com.jszf.txsystem.bean.RefundBean;
 import com.jszf.txsystem.bean.ResetPasswordBean;
 import com.jszf.txsystem.bean.ShiftBean;
@@ -100,7 +100,7 @@ public interface ApiRequestStores {
     //生成二维码
      @FormUrlEncoded
      @GET("order/getCodeUrl?")
-    Observable<ProductQrcodeBean> requestForProductQRcode(@QueryMap HashMap<String,String> params);
+    Observable<ProductCodeBean> requestForProductQRcode(@QueryMap HashMap<String,String> params);
 
     //订单分页数据
     @FormUrlEncoded

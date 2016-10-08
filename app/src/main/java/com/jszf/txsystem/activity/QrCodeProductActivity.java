@@ -29,7 +29,7 @@ import com.jszf.txsystem.MyApplication;
 import com.jszf.txsystem.R;
 import com.jszf.txsystem.bean.Merchant;
 import com.jszf.txsystem.bean.OrderInfo;
-import com.jszf.txsystem.bean.ProductQrcodeBean;
+import com.jszf.txsystem.bean.ProductCodeBean;
 import com.jszf.txsystem.core.ApiRequestStores;
 import com.jszf.txsystem.core.HttpHelper;
 import com.jszf.txsystem.core.mvp.base.BaseActivity;
@@ -61,7 +61,6 @@ import butterknife.OnClick;
 import okhttp3.Call;
 import okhttp3.Response;
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -244,10 +243,10 @@ public class QrCodeProductActivity extends BaseActivity implements Serializable 
     }
     private void requestForCode() {
         final ApiRequestStores apiStores = HttpHelper.getInstance().getRetrofit2().create(ApiRequestStores.class);
-        Observable<ProductQrcodeBean> observable = apiStores.requestForProductQRcode(getHashMap());
+        Observable<ProductCodeBean> observable = apiStores.requestForProductQRcode(getHashMap());
         observable.observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Subscriber<ProductQrcodeBean>() {
+                .subscribe(new Subscriber<ProductCodeBean>() {
                     @Override
                     public void onCompleted() {
 
@@ -259,10 +258,10 @@ public class QrCodeProductActivity extends BaseActivity implements Serializable 
                     }
 
                     @Override
-                    public void onNext(ProductQrcodeBean mProductQrcodeBean) {
-                        boolean isSuccess = mProductQrcodeBean.isSuccess();
+                    public void onNext(ProductCodeBean mProductCodeBean) {
+                        boolean isSuccess = mProductCodeBean.isSuccess();
                         if (isSuccess) {
-                            String url = mProductQrcodeBean.get_OrderModel().getCodeUrl();
+                            String url = mProductCodeBean.get_OrderModel().getCodeUrl();
                             Bitmap bmp = QRCodeUtils.createQRImage(url, 400, 400, smallbitmap,null);
                             mIvIconQrcode.setImageBitmap(bmp);
                         }
