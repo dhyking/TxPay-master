@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.jszf.txsystem.MyApplication;
 import com.jszf.txsystem.R;
+import com.jszf.txsystem.ScannerActivity;
 import com.jszf.txsystem.activity.AnalyseActivity;
 import com.jszf.txsystem.activity.PayActivity;
 import com.jszf.txsystem.bean.MainBean;
@@ -37,6 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -241,12 +243,14 @@ public class MainFragment extends MvpFragment<IMainView, MainPresenterImpl> impl
             case R.id.iv_home_baidu:
                 Log.d("MainFragment", "----------MainFragment----------百度钱包");
 
-                Intent mIntent4 = new Intent(MyApplication.mContext, PayActivity.class);
-                mIntent4.putExtra("payType", Constant.PAY_TYPE_BAIDU);
-                mIntent4.putExtra("merchantInfo", mMerchant);
-                startActivity(mIntent4);
-                getActivity().finish();
-                getActivity().overridePendingTransition(R.anim.fade_in_splash, R.anim.fade_out_splash);
+                startActivity(new Intent(getActivity(), ScannerActivity.class));
+
+//                Intent mIntent4 = new Intent(MyApplication.mContext, PayActivity.class);
+//                mIntent4.putExtra("payType", Constant.PAY_TYPE_BAIDU);
+//                mIntent4.putExtra("merchantInfo", mMerchant);
+//                startActivity(mIntent4);
+//                getActivity().finish();
+//                getActivity().overridePendingTransition(R.anim.fade_in_splash, R.anim.fade_out_splash);
 
                 break;
         }

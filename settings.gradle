@@ -1,1 +1,1 @@
-include ':app', ':autolayout', ':cptr'
+include ':app', ':autolayout', ':cptr', ':zxingscanner'

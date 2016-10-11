@@ -89,4 +89,14 @@
             android:textSize="@dimen/view_padding16" />
     </RelativeLayout>
 
+    <Button
+        android:visibility="gone"
+        android:layout_marginRight="@dimen/view_padding20"
+        android:layout_marginBottom="@dimen/view_padding20"
+        android:layout_gravity="bottom|right"
+        android:text="置顶"
+        android:id="@+id/btn_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
 </FrameLayout>

@@ -137,6 +137,8 @@
         <service android:name=".service_receiver.UpdateService" />
 
         <activity android:name=".activity.ShiftActivity" />
+
+        <activity android:name=".ScannerActivity"></activity>
     </application>
 
 </manifest>

@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -117,6 +118,7 @@ public class BillFragment extends BaseFragment implements CompoundButton.OnCheck
     private Observable mObservable;
     private CompositeSubscription compositeSubscription;
     private View mView;
+    private Button mBtn;
 
     public BillFragment() {
         // Required empty public constructor
@@ -344,11 +346,35 @@ public class BillFragment extends BaseFragment implements CompoundButton.OnCheck
             mView = inflater.inflate(R.layout.fragment_bill, container, false);
         }
         ButterKnife.bind(this, mView);
+        mBtn = (Button) mView.findViewById(R.id.btn_top);
         setStatus();
         setAdapter();
         initListener();
         iniRequest();
         initRefreshOrLoadMore();
+        mRecycleViewBill.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 10) {
+                    mBtn.setVisibility(View.VISIBLE);
+                }else {
+                    mBtn.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        mBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View mView) {
+                mRecycleViewBill.setVerticalScrollbarPosition(0);
+            }
+        });
         return mView;
     }
 
